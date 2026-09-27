@@ -36,6 +36,8 @@ jobs:
       EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
       NOMINATIM_USER_AGENT: CI/1.0 (https://example.com; ci@example.com)
       SITE_URL: http://testserver
+      SITE_NAME: Real-Estate (CI)
+      GEOCODING_CACHE_SECONDS: "0"
 
     steps:
       - uses: actions/checkout@v5

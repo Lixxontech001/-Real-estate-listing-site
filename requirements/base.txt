@@ -8,6 +8,17 @@
 
 Django==5.2.17
 django-allauth==65.19.4
+
+# allauth 65 declares only `asgiref` and `Django` as dependencies, but
+# allauth.socialaccount.providers.google imports `requests` at module import
+# time -- so without these the app fails to start with
+# "ModuleNotFoundError: No module named 'requests'". Declared explicitly.
+requests==2.32.4
+requests-oauthlib==2.0.0
+oauthlib==3.3.1
+PyJWT==2.10.1
+python3-openid==3.2.0
+
 django-crispy-forms==2.7
 crispy-bootstrap5==2025.4
 django-crum==0.7.9
