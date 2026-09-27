@@ -1,22 +1,25 @@
-<!-- Post to CONTACT :: url if user made no inquiry yet -->
+{% load i18n %}
+<!-- Inquiry form. Identity and the realtor's email are resolved server-side,
+     so only listing_id is sent; user_id and realtor_email were removed because
+     the old view trusted them from POST. -->
 <form action="{% url 'user-contact' %}" method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="user_id" value="{{ user.id }}">
-    <input type="hidden" name="realtor_email" value="{{ listing.realtor.email }}">
-    <input type="hidden" name="listing_id" value="{{ listing.id }}">
-    <input type="hidden" name="email" value="{{ email }}">
+  {% csrf_token %}
+  <input type="hidden" name="listing_id" value="{{ listing.id }}">
 
-    <div class="form-group">
-      <label for="phone" class="col-form-label">Phone:</label>
-      <input type="text" name="phone" class="form-control" {% if user.phone %}
-        value="{{ user.phone }}" {% else %} {% endif %} required>
-    </div>
+  <div class="mb-3">
+    <label for="inquiry-phone" class="form-label">{% translate "Phone" %}</label>
+    <input type="tel" name="phone" id="inquiry-phone" class="form-control"
+           value="{{ user.phone|default:'' }}" maxlength="100" required>
+  </div>
 
-    <div class="form-group">
-      <label for="message" class="col-form-label">Message:</label>
-      <textarea name="message" rows="4" class="form-control" placeholder='{{ _("Please enter message here...") }}' required></textarea>
-    </div>
+  <div class="mb-3">
+    <label for="inquiry-message" class="form-label">{% translate "Message" %}</label>
+    <textarea name="message" id="inquiry-message" rows="4" class="form-control"
+              maxlength="5000"
+              placeholder='{% translate "Please enter message here..." %}' required></textarea>
+  </div>
 
-    <input type="submit" value='{{ _("Make an Inquiry") }}' class="btn btn-block btn-secondary">
-
-  </form>
+  <button type="submit" class="btn btn-secondary w-100">
+    {% translate "Make an Inquiry" %}
+  </button>
+</form>

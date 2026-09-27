@@ -1,135 +1,159 @@
-from django.shortcuts import render, redirect
+import logging
+
+from django.conf import settings
 from django.contrib import messages
-from django.core.mail import send_mail
-from .models import Contact, ChatMessage
 from django.contrib.auth.decorators import login_required
-from django.utils.translation import ugettext_lazy as _
-from django.core.paginator import Paginator
-from django.views.generic import (DetailView, TemplateView)
+from django.core.mail import send_mail
+from django.db import IntegrityError
+from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
+from django.utils.translation import gettext_lazy as _
+from django.views.generic import DetailView
+
 from listings.models import Listing
 
+from .models import ChatMessage, Contact
 
+logger = logging.getLogger(__name__)
+
+
+@login_required
 def user_contact(request):
-    if request.method == 'POST':
-        listing_id = request.POST['listing_id']
-        phone = request.POST['phone']
-        message = request.POST['message']
-        user_id = request.POST['user_id']
-        realtor_email = request.POST['realtor_email']
+    """Submit an inquiry about a listing.
 
-        #  Check if user has made inquiry already
-        if request.user.is_authenticated:
-            user_id = request.user.id
-            has_contacted = Contact.objects.all().filter(
-                listing_id=listing_id, user_id=user_id)
-            if has_contacted:
-                messages.error(
-                    request, _("You have already made an inquiry "
-                               "for this listing"))
-                return redirect('listing', listing_id)
+    Three changes matter here:
 
-        contact = Contact(listing_id=listing_id, phone=phone, message=message,
-                          user_id=user_id)
+    1. Authentication is now required. Previously this endpoint was open to
+       anyone.
+    2. ``realtor_email`` is resolved **server-side from the Listing's realtor**,
+       never read from POST. The old code mailed a client-supplied address,
+       which made this an unauthenticated open email relay and a
+       listing-existence oracle.
+    3. ``user_id`` comes from ``request.user``, never from POST.
+    """
+    if request.method != "POST":
+        return redirect("index")
 
+    listing = get_object_or_404(
+        Listing, pk=request.POST.get("listing_id"), is_published=True
+    )
+
+    if Contact.objects.filter(listing=listing, user=request.user).exists():
+        messages.error(request, _("You have already made an inquiry for this listing"))
+        return redirect("listing", pk=listing.pk)
+
+    contact = Contact(
+        listing=listing,
+        user=request.user,
+        phone=request.POST.get("phone", "")[:100],
+        message=request.POST.get("message", "")[:5000],
+    )
+    try:
         contact.save()
+    except IntegrityError:
+        # Lost a race against the unique constraint -- treat as a duplicate.
+        messages.error(request, _("You have already made an inquiry for this listing"))
+        return redirect("listing", pk=listing.pk)
 
-        # Send email
-        send_mail(f'Property Listing Inquiry',
-                  f'There has been an inquiry for '
-                  f'{Listing.objects.get(id=listing_id)}'
-                  f'. Sign into the admin panel for more info',
-                  'schonefeld.dev@gmail.com',
-                  [realtor_email, 'schonefeld.dev@gmail.com'],
-                  fail_silently=False)
+    _notify_realtor(listing, contact)
 
-        messages.success(
-            request, (_("Your request has been submitted, a realtor will "
-                        "get back to you soon")))
-        return redirect('/listings/' + listing_id)
+    messages.success(
+        request,
+        _("Your request has been submitted, a realtor will get back " "to you soon"),
+    )
+    return redirect("listing", pk=listing.pk)
 
 
-def anonymous_contact(request):
-    if request.method == 'POST':
-        listing_id = request.POST['listing_id']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
-        phone = request.POST['phone']
-        message = request.POST['message']
-        realtor_email = request.POST['realtor_email']
+def _notify_realtor(listing, contact):
+    """Email the realtor about a new inquiry.
 
-        #  Check if user has made inquiry already
-        if request.user.is_authenticated:
-            user_id = request.user.id
-            has_contacted = Contact.objects.all().filter(
-                listing_id=listing_id, first_name=first_name,
-                last_name=last_name)
-            if has_contacted:
-                messages.error(
-                    request, _("You have already made an inquiry for this "
-                               "listing"))
-                return redirect('listing', pk=listing_id)
-
-        contact = Contact(listing_id=listing_id, phone=phone, message=message,
-                          user_id=user_id)
-
-        contact.save()
-
-        # Send email
-        send_mail('Property Listing Inquiry',
-                  'There has been an inquiry for '
-                  + Listing.object.get(id=listing_id)
-                  + '. Sign into the admin panel for more info',
-                  'schonefeld.dev@gmail.com',
-                  [realtor_email, 'schonefeld.dev@gmail.com'],
-                  fail_silently=False)
-
-        messages.success(
-            request, (_("Your request has been submitted, a realtor will "
-                        "get back to you soon")))
-        return redirect('/listings/' + listing_id)
+    Never raises: a mail failure must not lose the inquiry or show the user a
+    500. The previous version used ``fail_silently=False`` and mailed a
+    hardcoded personal address as a blind CC on every lead.
+    """
+    recipient = listing.realtor.email
+    if not recipient:
+        logger.info(
+            "Listing %s has no realtor email; skipping notification", listing.pk
+        )
+        return
+    body = (
+        f"A new inquiry was submitted for “{listing.title}”.\n\n"
+        f"From: {contact.user.get_full_name()}\n"
+        f"Email: {contact.user.email}\n"
+        f"Phone: {contact.phone}\n\n"
+        f"{contact.message}\n"
+    )
+    try:
+        send_mail(
+            subject=_("New property inquiry: %s") % listing.title,
+            message=body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[recipient],
+            fail_silently=True,
+        )
+    except Exception:
+        logger.exception(
+            "Could not send inquiry notification for listing %s", listing.pk
+        )
 
 
 @login_required
 def chat_message(request):
-    if request.method == 'POST':
-        contact_id = request.POST['contact_id']
-        user_id = request.POST['user_id']
-        message = request.POST['message']
+    """Post a message into an inquiry thread.
 
-        obj = ChatMessage(contact_id=contact_id, message=message,
-                          user_id=user_id)
+    The old version read ``user_id`` straight from ``request.POST``, so any
+    logged-in user could post messages as any other user, into any thread.
+    Identity and thread ownership are now both derived from the session.
+    """
+    if request.method != "POST":
+        return redirect("index")
 
-        obj.save()
+    contact = get_object_or_404(Contact, pk=request.POST.get("contact_id"))
 
-        messages.success(
-            request, (_("Your request has been submitted, a realtor will ' \
-                        'get back to you soon")))
-        return redirect('chat-history', pk=contact_id)
+    if contact.user_id != request.user.pk:
+        # A realtor may reply to threads on their own listings.
+        owns_listing = contact.listing.realtor.user_id == request.user.pk
+        if not (owns_listing or request.user.is_staff):
+            raise Http404
+
+    message = (request.POST.get("message") or "").strip()
+    if not message:
+        messages.error(request, _("Message cannot be empty"))
+        return redirect("chat-history", pk=contact.pk)
+
+    ChatMessage.objects.create(contact=contact, user=request.user, message=message)
+    messages.success(request, _("Message sent"))
+    return redirect("chat-history", pk=contact.pk)
 
 
 class MessageHistoryListView(DetailView):
+    """A buyer's private message thread with the realtor.
+
+    Previously reachable by any logged-in user with no ownership check, and by
+    anonymous users at all, just by walking the integer id. It is now
+    restricted to the thread's owner, the listing's realtor, and staff.
+    """
+
     model = Contact
-    template_name = 'contacts/messages_history.html'
+    template_name = "contacts/messages_history.html"
+    context_object_name = "contact"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Contact.objects.all()
+        if user.is_authenticated:
+            return Contact.objects.filter(Q(user=user) | Q(listing__realtor__user=user))
+        return Contact.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Showcase Section Infos
-        context['title'] = _("Message History")
-        context['subtitle'] = self.object.listing.title
-        # SEO
-        context['page_title'] = _("Message History")
-        context['page_description'] = _("Real estate manager."
-                                        "Here you can follow your message "
-                                        "history, related to a specific "
-                                        "listing you are interested in..")
-        return context
-
-
-class AdminContactView(TemplateView):
-    # TODO finish this crap
-    template_name = 'admin/contact.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['contact'] = Contact.objects.get(id=5)
+        contact = self.object
+        context["messages_list"] = contact.messages.select_related("user")
+        context["title"] = _("Message History")
+        context["subtitle"] = contact.listing.title
+        context["page_title"] = _("Message History")
+        context["page_description"] = _("Your message history for this listing.")
         return context

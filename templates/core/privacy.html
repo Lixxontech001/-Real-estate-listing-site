@@ -2,6 +2,7 @@
 {% load static %}
 
 {% load static %}
+{% load i18n %}
 
 
 {% block content %}
@@ -19,7 +20,7 @@
                     <a href="{% url 'index' %}">
                         <i class="fas fa-home"></i> Home</a>
                 </li>
-                <li class="breadcrumb-item active"> {{ _("Privacy") }}</li>
+                <li class="breadcrumb-item active"> {% translate "Privacy" %}</li>
             </ol>
         </nav>
     </div>

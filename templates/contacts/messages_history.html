@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 
 
 {% block content %}
@@ -23,15 +24,15 @@
         <li class="breadcrumb-item">
           <a href="{% url 'index' %}">
             <i class="fas fa-home"></i>
-            {{ _("Home") }}
+            {% translate "Home" %}
           </a>
         </li>
         <li class="breadcrumb-item">
           <a href="{% url 'dashboard' %}">
-            {{ _("Dashboard") }}
+            {% translate "Dashboard" %}
           </a>
         </li>
-        <li class="breadcrumb-item active"> {{ _("History") }}</li>
+        <li class="breadcrumb-item active"> {% translate "History" %}</li>
 
       </ol>
     </nav>
@@ -50,15 +51,14 @@
 
 
       <div class="card mb-4">
-        <div class="card-header">{{ _("Send new message") }}</div>
+        <div class="card-header">{% translate "Send new message" %}</div>
         <form action="{% url 'chat' %}" method="POST">
           {% csrf_token %}
-          <input type="hidden" name="user_id" value="{{ user.id }}">
           <input type="hidden" name="contact_id" value="{{ object.id }}">
 
           <div class="form-group pl-2 pr-2 pt-2">
 
-            <textarea name="message" class="form-control" rows="4" placeholder='{{ _("Enter message here please...") }}'
+            <textarea name="message" class="form-control" rows="4" placeholder='{% translate "Enter message here please..." %}'
               required></textarea>
 
             <div class="row mt-2 mb-2">
@@ -67,7 +67,7 @@
               </div>
               <div class="col-12 col-lg-6">
                 <button type="button" class="btn btn-outline-secondary btn-block"
-                  onclick="history.back()">{{ _("Go back") }}</button>
+                  onclick="history.back()">{% translate "Go back" %}</button>
               </div>
 
             </div>
@@ -78,7 +78,7 @@
 
 
       <div>
-        <h2 class="text-center mb-5 mt-5">{{_("History") }}</h2>
+        <h2 class="text-center mb-5 mt-5">{% translate "History" %}</h2>
       </div>
 
       <div>
@@ -101,7 +101,7 @@
 
         {% endfor %}
         {% else %}
-        {{ _("Nothing to display") }}
+        {% translate "Nothing to display" %}
         {% endif %}
       </div>
 

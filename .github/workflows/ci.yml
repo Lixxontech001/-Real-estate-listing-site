@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DJANGO_ENV: prod
+      SECRET_KEY: ci-only-not-a-real-secret
+      DEBUG: "false"
+      ALLOWED_HOSTS: localhost,testserver
+      DATABASE_URL: postgres://test:test@localhost:5432/test
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      NOMINATIM_USER_AGENT: CI/1.0 (https://example.com; ci@example.com)
+      SITE_URL: http://testserver
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements/*.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/dev.txt
+
+      - name: System check
+        run: python manage.py check
+
+      - name: Deployment safety check
+        # Catches missing security settings before they reach a public host.
+        # This is the check the old broken production_settings loader silently
+        # bypassed.
+        run: python manage.py check --deploy --fail-level WARNING
+
+      - name: Migrations are up to date
+        # Fails if a model changed without a migration being committed.
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Lint
+        run: |
+          flake8 .
+          black --check --diff .
+          isort --check-only --diff .
+
+      - name: Security scan
+        run: bandit -r . -x ./tests,./staticfiles --severity-level medium
+
+      - name: Tests
+        run: pytest --cov=. --cov-report=xml --cov-report=term-missing

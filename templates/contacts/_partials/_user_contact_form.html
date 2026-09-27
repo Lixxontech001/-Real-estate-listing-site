@@ -1,15 +1,21 @@
-<!-- Post to CHAT :: url if user already made an inquiry -->
+{% load i18n %}
+<!-- Chat form, shown when the user already has an inquiry on this listing.
+     user_id is not sent: the view derives identity from the session. -->
 <form action="{% url 'chat' %}" method="POST">
   {% csrf_token %}
-
-  <input type="hidden" name="user_id" value="{{ user.id }}">
   <input type="hidden" name="contact_id" value="{{ contact }}">
-  
-  <div class="form-group">
-    <label for="message" class="col-form-label">{{ _("Message") }}:</label>
-    <textarea name="message" rows="4" class="form-control" placeholder='{{ _("Please enter message here...") }}' required></textarea>
+
+  <div class="mb-3">
+    <label for="chat-message" class="form-label">{% translate "Message" %}</label>
+    <textarea name="message" id="chat-message" rows="4" class="form-control"
+              maxlength="5000"
+              placeholder='{% translate "Please enter message here..." %}' required></textarea>
   </div>
 
-  <input type="submit" value='{{ _("Send message") }}' class="btn btn-block btn-secondary mb-2">
-    <a class="btn btn-primary btn-block" href="{% url 'chat-history' contact %}">{{ _("View history") }}</a>
+  <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-secondary">{% translate "Send message" %}</button>
+    <a class="btn btn-primary" href="{% url 'chat-history' contact %}">
+      {% translate "View history" %}
+    </a>
+  </div>
 </form>

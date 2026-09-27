@@ -1,0 +1,15 @@
+# Development and CI. Not installed in production images.
+-r base.txt
+
+pytest==8.4.2
+pytest-django==4.11.1
+pytest-cov==7.0.0
+flake8==7.3.0
+black==25.9.0
+isort==6.1.0
+bandit==1.8.6
+coverage==7.10.7
+
+# Media storage, for exercising the S3 code path locally against MinIO.
+django-storages[boto3]==1.14.6
+boto3==1.40.40

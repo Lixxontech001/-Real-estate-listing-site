@@ -1,23 +1,29 @@
 {% load filters %}
+{% load i18n %}
 
 
 <div class="col-md-3">
   <div class="card mb-3">
-    <img class="card-img-top p-3" src="{{ listing.realtor.photo.url }}" alt="">
+    {% if listing.realtor.photo %}
+      <img class="card-img-top p-3" src="{{ listing.realtor.photo.url }}"
+           alt="{{ listing.realtor.name }}" loading="lazy">
+    {% else %}
+      <div class="card-img-top p-3 bg-secondary"></div>
+    {% endif %}
     <div class="card-body">
-      <h5 class="card-title">{{ _("Property Realtor") }}</h5>
+      <h5 class="card-title">{% translate "Property Realtor" %}</h5>
       <h6 class="mb-4">{{ listing.realtor }}</h6>
 
       <hr>
 
       {% if user.is_authenticated %}
 
-      {% with listing.id|listing_exists as contact %}
+      {% with listing.user_inquiry_id as contact %}
       {% if contact %}
       {% include 'contacts/_partials/_user_contact_form.html' %}
       {% else %}
       <h5 class="p-2 text-green text-center">
-        <b>{{ _("Get in touch") }}</b>
+        <b>{% translate "Get in touch" %}</b>
       </h5>
       {% include 'contacts/_partials/_user_inquiry_form.html' %}
       {% endif %}
@@ -25,7 +31,7 @@
 
       {% else %}
       <h5 class="p-2 text-green text-center">
-        <b>{{ _("Please login or register to get in touch") }}</b>
+        <b>{% translate "Please login or register to get in touch" %}</b>
       </h5>
 
       <a href="{% url 'login' %}" target="_blank" class="btn btn-block btn-secondary text-white">

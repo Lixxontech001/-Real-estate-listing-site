@@ -5,6 +5,44 @@
 
 {% load humanize %}
 
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateListing",
+  "name": {{ listing.title|default:""|stringformat:"j" }},
+  "url": "{{ domain }}{{ request.path }}",
+  "datePosted": "{{ listing.created|date:'c' }}",
+  "dateModified": "{{ listing.updated|date:'c' }}",
+  "offers": {
+    "@type": "Offer",
+    "price": "{{ listing.price|floatformat:2 }}",
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ listing.address.street }} {{ listing.address.hn }}",
+    "addressLocality": "{{ listing.address.city }}",
+    "postalCode": "{{ listing.address.zipcode }}",
+    "addressRegion": "{{ listing.address.state.name }}",
+    "addressCountry": "{{ listing.address.state.country.shortcut }}"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": "{{ listing.latitude|default_if_none:'' }}",
+    "longitude": "{{ listing.longitude|default_if_none:'' }}"
+  },
+  "numberOfRooms": {{ listing.get_total_rooms }},
+  "floorSize": {
+    "@type": "QuantitativeValue",
+    "value": {{ listing.sqft|default_if_none:'' }},
+    "unitCode": "MTK"
+  }
+}
+</script>
+{% endblock %}
+
 {% block content %}
 
 
@@ -18,10 +56,10 @@
     <nav>
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
-          <a href="{% url 'index' %}">{{ _("Home") }}</a>
+          <a href="{% url 'index' %}">{% translate "Home" %}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'listings' %}">{{ _("Listings") }}</a>
+          <a href="{% url 'listings' %}">{% translate "Listings" %}</a>
         </li>
         <li class="breadcrumb-item active">{{ listing.title }}</li>
       </ol>
@@ -38,7 +76,7 @@
 
     <div class="row col-12 px-0">
       <div class="col-8">
-        <a href="{% url 'listings' %}" class="btn btn-light mb-4">{{ _("Back To Listings") }}</a>
+        <a href="{% url 'listings' %}" class="btn btn-light mb-4">{% translate "Back To Listings" %}</a>
       </div>
       <div class="col-4 text-right mr-0 pr-0">
 
@@ -57,17 +95,21 @@
     <div class="row">
       <div class="col-md-9">
         <!-- Home Main Image -->
-        <img src="{{ listing.image.url }}" alt="" class="img-main img-fluid mb-3">
+        {% if listing.image %}<img src="{{ listing.image.url }}"
+         alt="{% blocktranslate with title=listing.title %}Photo of {{ title }}{% endblocktranslate %}"
+         class="img-main img-fluid mb-3" loading="lazy">{% endif %}
         <!-- Thumbnails -->
         <div class="row thumbs listing-second-title">
-          {% for img in listing.listingimage_set.all %}
+          {% for img in listing.listingimage_set.all %}{% if img.image %}
           <div class="col-6 col-sm-4 col-md-4 col-lg-3 col-xl-2">
             <a href="{{ img.image.url }}" data-lightbox="home-images">
-              <img src="{{ img.image.url }}" alt="" class="img-fluid img-inline-listing">
+              <img src="{{ img.image.url }}" alt="{% if img.short_description %}{{ img.short_description }}{% else %}{{ listing.title }}{% endif %}"
+                   class="img-fluid img-inline-listing" loading="lazy">
             </a>
           </div>
           <br>
-          {% endfor%}
+          {% endif %}
+          {% endfor %}
         </div>
 
 
@@ -91,18 +133,18 @@
 
           <!-- Description -->
           <div class="col-md-12 mb-5">
-            <h5 class="mb-3">{{ _("Description") }}</h5>
+            <h5 class="mb-3">{% translate "Description" %}</h5>
             <p class="mb-2">{{ listing.description }}</p>
 
             {%if listing.protected %}
             <small class="uppercase">
-              {{ _("This object is listed") }}
+              {% translate "This object is listed" %}
             </small>
 
             {% else %}
 
             <small>
-              {{ _("This object is not listed") }}
+              {% translate "This object is not listed" %}
             </small>
 
             {% endif %}
@@ -115,24 +157,24 @@
 
 
               <li class="list-group-item">
-                <i class="fas fa-bed text-secondary pr-2"></i> {{ _("Bedrooms") }}:
+                <i class="fas fa-bed text-secondary pr-2"></i> {% translate "Bedrooms" %}:
                 <span class="float-right">{{ listing.bedrooms }}</span>
               </li>
 
               <li class="list-group-item">
-                <i class="fas fa-bath text-secondary pr-2"></i> {{ _("Bathrooms") }}:
+                <i class="fas fa-bath text-secondary pr-2"></i> {% translate "Bathrooms" %}:
                 <span class="float-right">{{ listing.bathrooms }}</span>
               </li>
 
               <li class="list-group-item">
-                <i class="fas fa-car text-secondary pr-2"></i> {{ _("Garage") }}:
+                <i class="fas fa-car text-secondary pr-2"></i> {% translate "Garage" %}:
                 <span class="float-right">{{ listing.garage }}
                 </span>
               </li>
 
               <li class="list-group-item">
-                <i class="fas fa-arrows-alt-v text-secondary pr-2"></i> {{ _("Ceiling height") }}:
-                <span class="float-right">{{ listing.ceiling_height }} {{ _("m") }}
+                <i class="fas fa-arrows-alt-v text-secondary pr-2"></i> {% translate "Ceiling height" %}:
+                <span class="float-right">{{ listing.ceiling_height }} {% translate "m" %}
                 </span>
               </li>
 
@@ -146,23 +188,23 @@
             <ul class="list-group list-group-flush">
 
               <li class="list-group-item">
-                <i class="fas fa-money-bill-alt text-secondary pr-2"></i> {{ _("Price") }}
+                <i class="fas fa-money-bill-alt text-secondary pr-2"></i> {% translate "Price" %}
                 <span class="float-right">{{ listing.price | intcomma }} €</span>
               </li>
 
               <li class="list-group-item">
-                <i class="fas fa-th-large text-secondary pr-2"></i> {{ _("Square Feet") }}:
-                <span class="float-right">{{ listing.sqft }} {{ _("m²") }}
+                <i class="fas fa-th-large text-secondary pr-2"></i> {% translate "Square Feet" %}:
+                <span class="float-right">{{ listing.sqft }} {% translate "m²" %}
 
                 </span>
               </li>
               <li class="list-group-item">
-                <i class="fas fa-square text-secondary pr-2"></i> {{ _("Lot Size") }}:
-                <span class="float-right">{{ listing.lot_size }} {{ _("m²") }}
+                <i class="fas fa-square text-secondary pr-2"></i> {% translate "Lot Size" %}:
+                <span class="float-right">{{ listing.lot_size }} {% translate "m²" %}
                 </span>
               </li>
               <li class="list-group-item">
-                <i class="fas fa-calendar text-secondary pr-2"></i> {{ _("Free from") }}:
+                <i class="fas fa-calendar text-secondary pr-2"></i> {% translate "Free from" %}:
                 <span class="float-right">{{ listing.free_date }}</span>
               </li>
 
@@ -179,7 +221,7 @@
         </div>
 
         <div>
-          <small>{{ _("Object from the ") }}
+          <small>{% translate "Object from the " %}
             <span>{{ listing.created|date:"d M Y" }}</span>
 
           </small>
@@ -195,25 +237,20 @@
 </section>
 
 
-<script>
-  function myMap() {
-    const myLatLng = {
-      lat: {{ listing.get_coordinates.latitude|stringformat:"f"}},
-      lng: {{ listing.get_coordinates.longitude|stringformat:"f" }}
-    };
-  var mapProp = { center: new google.maps.LatLng(myLatLng), zoom: 14 };
-  var map = new google.maps.Map(document.getElementById("map"), mapProp);
-  const marker = new google.maps.Marker({
-    position: myLatLng,
-    map,
-    title: "{{ listing.get_coordinates.address }}"
-  });
-  }
+<div id="map" style="height: 400px; width: 100%;"
+     {% if listing.latitude and listing.longitude %}
+     data-lat="{{ listing.latitude|stringformat:'f' }}"
+     data-lng="{{ listing.longitude|stringformat:'f' }}"
+     data-title="{{ listing.get_address }}"
+     {% endif %}></div>
 
-</script>
-
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=[YOUR-API-KEY]&callback=myMap"></script>
+{% if listing.latitude and listing.longitude and google_maps_api_key %}
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initPropertyMap"
+    referrerpolicy="no-referrer-when-downgrade"></script>
+{% elif not listing.latitude %}
+  <p class="text-muted"><em>{% translate "Map location is not available for this property." %}</em></p>
+{% endif %}
 
 
 {% endblock %}

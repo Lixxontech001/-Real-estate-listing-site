@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% load filters %}
+{% load i18n %}
 
 {% block extrastyle %}
 <meta name="description" content="Real estate manager.
@@ -14,9 +15,9 @@
     <div class="row">
       <div class="col-md-12 my-5">
         <h1 class="display-4 my-5 showcase-text">
-          {{ _("Dashboard") }}
+          {% translate "Dashboard" %}
         </h1>
-        <p class="lead ">{{ _("Manage your Real-Estate account") }}</p>
+        <p class="lead ">{% translate "Manage your Real-Estate account" %}</p>
       </div>
     </div>
   </div>
@@ -29,9 +30,9 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'index' %}">
-            <i class="fas fa-home"></i> {{ _("Home") }}</a>
+            <i class="fas fa-home"></i> {% translate "Home" %}</a>
         </li>
-        <li class="breadcrumb-item active"> {{ _("Dashboard") }}</li>
+        <li class="breadcrumb-item active"> {% translate "Dashboard" %}</li>
       </ol>
     </nav>
   </div>
@@ -50,16 +51,16 @@
   <div class="container">
     <div class="row">
       <div class="col-md-12">
-        <h2>{{ _("Welcome") }} {{ user.first_name }}</h2>
-        <p>{{ _("Here are the property listings that you have inquired about") }}</p>
+        <h2>{% translate "Welcome" %} {{ user.first_name }}</h2>
+        <p>{% translate "Here are the property listings that you have inquired about" %}</p>
 
         {% if contacts %}
         <table class="table">
           <thead>
             <tr>
-              <th>{{ _("Property") }}</th>
-              <th>{{ _("Date") }}</th>
-              <th>{{ _("Action") }}</th>
+              <th>{% translate "Property" %}</th>
+              <th>{% translate "Date" %}</th>
+              <th>{% translate "Action" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -73,14 +74,14 @@
                     {% if contact.can_access_documents %}
                     <a class="btn btn-secondary btn-block"" href="{% url 'documents' contact.listing.id %}">
                       <i class="fas fa-folder-open"></i>
-                      {{ _("Files") }}
-                      ({{ contact.listing.id|get_nr_docs }}) </a>
+                      {% translate "Files" %}
+                      ({{ contact.listing.customer_docs_count|default:0 }}) </a>
                     {% endif %}
                   </div>
                   <div class="col-12 col-md-6 col-lg-4 mb-1 ">
                     <a class="btn btn-outline-primary btn-block"" href="{% url 'listing' contact.listing_id %}">
                       <i class="fas fa-eye"></i>
-                      {{ _("Listing") }}
+                      {% translate "Listing" %}
                     </a>
                   </div>
 
@@ -88,7 +89,7 @@
                     {% if contact.chatmessage_set.all.count > 0 %}
                     <a class="btn btn-outline-secondary btn-block" href="{% url 'chat-history' contact.id %}">
                       <i class="fas fa-eye"></i>
-                      {{ _("History") }}
+                      {% translate "History" %}
                     </a>
                     {% endif %}
                   </div>
@@ -102,7 +103,7 @@
         </table>
 
         {% else %}
-        <p>{{ _("You have not made any inquiries") }}</p>
+        <p>{% translate "You have not made any inquiries" %}</p>
         {% endif %}
       </div>
     </div>

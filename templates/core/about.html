@@ -2,6 +2,7 @@
 {% load static %}
 
 {% load static %}
+{% load i18n %}
 
 
 {% block content %}
@@ -16,9 +17,9 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'index' %}">
-            <i class="fas fa-home"></i>{{ _("Home") }} </a>
+            <i class="fas fa-home"></i>{% translate "Home" %} </a>
         </li>
-        <li class="breadcrumb-item active">{{ _("About") }}</li>
+        <li class="breadcrumb-item active">{% translate "About" %}</li>
       </ol>
     </nav>
   </div>
@@ -28,16 +29,16 @@
   <div class="container">
     <div class="row">
       <div class="col-md-9">
-        <h2 class="pb-1">{{ _("We Search For The Perfect Home") }}</h2>
+        <h2 class="pb-1">{% translate "We Search For The Perfect Home" %}</h2>
         <img src="{% static 'img/about.jpg' %}" alt="">
         <p class="mt-4">{{ canonical }}
 
-          {{ _("Placeholder") }}
+          {% translate "Placeholder" %}
 
       </div>
       <div class="col-md-3">
         <div>
-          <h3 class="pb-2">{{ _("Management") }}</h3>
+          <h3 class="pb-2">{% translate "Management" %}</h3>
           <img class="square-pic pb-3" src="{% static 'img/nima.png' %}" alt="Marie Smith">
           <h5 class="text-secondary pb-1">Nima Dorostkar Smith</h5>
           <p>
@@ -60,7 +61,7 @@
             }
           </style>
 
-          <h3>{{ _("Cooperation") }}</h3>
+          <h3>{% translate "Cooperation" %}</h3>
           <a href="#" target="_blank">
             <div id="exclusivityBadgeContainer" title="immowelt Diamond Partner Award ">
             </div>
@@ -74,9 +75,9 @@
 
 <!-- Work -->
 <section id="work" class="bg-dark text-white text-center">
-  <h2 class="display-4 pb-3">{{ _("We Work For You") }}</h2>
+  <h2 class="display-4 pb-3">{% translate "We Work For You" %}</h2>
 
-  <a href="{% url 'listings' %}" class="btn btn-secondary text-white btn-lg">{{ _("View Our Featured Listings") }}</a>
+  <a href="{% url 'listings' %}" class="btn btn-secondary text-white btn-lg">{% translate "View Our Featured Listings" %}</a>
 </section>
 
 
@@ -84,17 +85,23 @@
 <!-- Team -->
 <section id="team" class="py-5">
   <div class="container">
-    <h2 class="text-center pb-5">{{ _("Our Team") }}</h2>
+    <h2 class="text-center pb-5">{% translate "Our Team" %}</h2>
     <div class="row text-center">
 
       {% for realtor in realtors %}
 
 
       <div class="{% if realtors.count > 2 %} col-md-4 {% else %} col-md-6 {% endif %}">
-        <img src="{{ realtor.photo.url }}" alt="{{ realtor.name }}" class="rounded-circle-5 mb-3">
+        {% if realtor.photo %}
+        <img src="{{ realtor.photo.url }}" alt="{{ realtor.name }}"
+             class="rounded-circle-5 mb-3" loading="lazy">
+        {% else %}
+        <div class="rounded-circle-5 mb-3 bg-secondary" role="img"
+             aria-label="{{ realtor.name }}"></div>
+        {% endif %}
         <h4>{{ realtor.name }}</h4>
         <p class="text-success">
-          <i class="fas fa-award text-success mb-3"></i> {{ _("Realtor") }}</p>
+          <i class="fas fa-award text-success mb-3"></i> {% translate "Realtor" %}</p>
         <hr>
         <p>
           <i class="fas fa-phone"></i> {{ realtor.phone }}</p>

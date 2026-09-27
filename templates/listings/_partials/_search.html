@@ -2,6 +2,7 @@
 {% load static %}
 
 {% load humanize %}
+{% load i18n %}
 
 {% block title %} | Search Results {% endblock %}
 
@@ -23,12 +24,12 @@
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
             <a href="{% url 'index' %}">
-              <i class="fas fa-home"></i>{{ _("Home") }} </a>
+              <i class="fas fa-home"></i>{% translate "Home" %} </a>
           </li>
           <li class="breadcrumb-item">
-            <a href="{% url 'listings' %}">{{ _("Browse Listings") }}</a>
+            <a href="{% url 'listings' %}">{% translate "Browse Listings" %}</a>
           </li>
-          <li class="breadcrumb-item active">{{ _("Search Results") }} </li>
+          <li class="breadcrumb-item active">{% translate "Search Results" %} </li>
         </ol>
       </nav>
     </div>
@@ -44,7 +45,7 @@
         {% endfor %}
       {% else %}
         <div class="col-md-12">
-          <p>{{ _("No Listings Available") }}</p>
+          <p>{% translate "No Listings Available" %}</p>
         </div>
       {% endif %}
       </div>

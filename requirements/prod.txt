@@ -1,0 +1,6 @@
+# Production-only: object storage for media.
+-r base.txt
+
+django-storages[boto3]==1.14.6
+boto3==1.40.40
+sentry-sdk==2.42.0
