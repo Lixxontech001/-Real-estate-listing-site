@@ -29,7 +29,6 @@ jobs:
 
     env:
       DJANGO_ENV: prod
-      SECRET_KEY: ci-only-not-a-real-secret
       DEBUG: "false"
       ALLOWED_HOSTS: localhost,testserver
       DATABASE_URL: postgres://test:test@localhost:5432/test
@@ -52,6 +51,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements/dev.txt
+
+      # Generated, not hardcoded. A weak literal here trips security.W009 and
+      # fails the deploy check below -- which is the check working correctly.
+      - name: Generate a throwaway secret key
+        run: |
+          echo "SECRET_KEY=$(python -c \
+            "from django.core.management.utils import get_random_secret_key as g; print(g())")" \
+            >> "$GITHUB_ENV"
 
       - name: System check
         run: python manage.py check
