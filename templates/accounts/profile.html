@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 
 {% block extrastyle %}
 <meta name="description" content="Real estate manager.
@@ -20,9 +21,9 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'index' %}">
-            <i class="fas fa-home"></i> {{ _("Home") }}</a>
+            <i class="fas fa-home"></i> {% translate "Home" %}</a>
         </li>
-        <li class="breadcrumb-item active"> {{ _("Profile") }}</li>
+        <li class="breadcrumb-item active"> {% translate "Profile" %}</li>
       </ol>
     </nav>
   </div>
@@ -37,8 +38,8 @@
     <div class="pb-3 pt-3">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">{{ _("Profile Information") }}</h5>
-          <h6 class="card-subtitle mb-2 text-muted">{{ _("Last login") }}: {{ user.last_login }}</h6>
+          <h5 class="card-title">{% translate "Profile Information" %}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{% translate "Last login" %}: {{ user.last_login }}</h6>
           <hr>
           <form method="POST">
             {% csrf_token %}

@@ -1,3 +1,4 @@
+{% load i18n %}
 {% if messages %}
   {% for message in messages %}
     <div id="message" class="container">
@@ -5,7 +6,7 @@
         <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span></button>
         <strong>
           {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-            {{ _("Error") }}: 
+            {% translate "Error" %}: 
           {% else %}
             {{ message.tags|title }}
           {% endif %}

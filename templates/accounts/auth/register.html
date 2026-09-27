@@ -1,47 +1,63 @@
 {% extends 'core/base.html' %}
-{% load static %}
-
+{% load i18n %}
 
 {% block content %}
 <section id="register" class="py-5">
   <div class="container">
-
-
     <div class="row">
-      <div class="col-md-6 mx-auto">
+      <div class="col-md-7 mx-auto">
         <div class="card">
           <div class="card-header bg-primary text-white">
-            <h1 class="smaller-text">
-              <i class="fas fa-user-plus"></i> {{ title }}
+            <h1 class="h4 mb-0">
+              <i class="fas fa-user-plus" aria-hidden="true"></i>
+              {% translate "Register" %}
             </h1>
           </div>
-          <div class="card-body bg-light ">
-            <!-- Alerts -->
+          <div class="card-body bg-light">
             {% include 'core/partials/_alerts.html' %}
-            <form action="{% url 'register' %}" method="POST">
+
+            <form method="post" action="{% url 'register' %}" novalidate>
               {% csrf_token %}
-              <div class="form-group">
-                <label for="first_name">{{ _("Firstname") }}</label>
-                <input type="text" name="first_name" class="form-control" required>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                  {{ form.first_name }}
+                  {% for error in form.first_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                  {{ form.last_name }}
+                  {% for error in form.last_name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+                </div>
               </div>
-              <div class="form-group">
-                <label for="last_name">{{ _(" Lastname") }}</label>
-                <input type="text" name="last_name" class="form-control" required>
+
+              <div class="mb-3">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% for error in form.email.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
               </div>
-              <div class="form-group">
-                <label for="email">{{ _("Email") }}</label>
-                <input type="email" name="email" class="form-control" required>
+
+              <div class="mb-3">
+                <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+                {{ form.password1 }}
+                <div class="form-text">{% translate "At least 12 characters, and not a common password." %}</div>
+                {% for error in form.password1.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
               </div>
-              <div class="form-group">
-                <label for="password2">{{ _("Password") }}</label>
-                <input type="password" name="password" class="form-control" required>
+
+              <div class="mb-3">
+                <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+                {{ form.password2 }}
+                {% for error in form.password2.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
               </div>
-              <div class="form-group">
-                <label for="password">{{ _("Confirm Password") }}</label>
-                <input type="password" name="password2" class="form-control" required>
-              </div>
-              <input type="submit" value="Register" class="btn btn-secondary btn-block">
+
+              <button type="submit" class="btn btn-secondary w-100">{% translate "Register" %}</button>
             </form>
+
+            <p class="mt-3 mb-0 text-center">
+              {% translate "Already have an account?" %}
+              <a href="{% url 'login' %}">{% translate "Login" %}</a>
+            </p>
           </div>
         </div>
       </div>

@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<section id="showcase-inner" class="showcase-search text-white py-5">
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-md-12">
+        {% include 'core/partials/_search.html' %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="bc" class="mt-3">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'index' %}"><i class="fas fa-home" aria-hidden="true"></i> {% translate "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'listings' %}">{% translate "Browse Listings" %}</a>
+        </li>
+        <li class="breadcrumb-item active">{% translate "Search Results" %}</li>
+      </ol>
+    </nav>
+  </div>
+</section>
+
+{% include 'core/partials/_alerts.html' %}
+
+<section id="listings" class="py-4">
+  <div class="container">
+    {% if form.errors %}
+      <div class="alert alert-warning" role="alert">
+        {% translate "Some search criteria were invalid and have been ignored." %}
+      </div>
+    {% endif %}
+
+    <div class="row">
+      {% for listing in listings %}
+        {% include 'listings/_partials/_listing-box.html' %}
+      {% empty %}
+        <div class="col-md-12">
+          <p>{% translate "No Listings Available" %}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

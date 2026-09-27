@@ -1,32 +1,39 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
 
   {% include 'core/partials/_header.html' %}
 
-
 <body>
+  <a class="visually-hidden-focusable skip-link" href="#main-content">
+    {% translate "Skip to main content" %}
+  </a>
+
   <header>
-  <!-- Top Bar -->
-  {% include 'core/partials/_topbar.html' %}
-  <!-- NavBar -->
-  {% include 'core/partials/_navbar.html' %}
+    {% include 'core/partials/_topbar.html' %}
+    {% include 'core/partials/_navbar.html' %}
   </header>
 
-  <main>
-    <!-- Main Content -->
-    {% block content %} {% endblock %}
+  <main id="main-content">
+    {% block content %}{% endblock %}
   </main>
 
-  
-  <!-- Footer -->
   {% include 'core/partials/_footer.html' %}
-  
 
-  <script src="{% static 'js/jquery-3.3.1.min.js' %} "></script>
-  <script src="{% static 'js/bootstrap.bundle.min.js' %} "></script>
-  <script src="{% static 'js/lightbox.min.js' %} "></script>
-  <script src="{% static 'js/main.js' %} "></script>
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+  <script>
+    // Deferred so the map container has been laid out before we measure it.
+    window.initPropertyMap = function () {
+      var el = document.getElementById('map');
+      if (!el || !window.google) { return; }
+      var lat = parseFloat(el.dataset.lat), lng = parseFloat(el.dataset.lng);
+      if (isNaN(lat) || isNaN(lng)) { return; }
+      var centre = { lat: lat, lng: lng };
+      new google.maps.Map(el, { center: centre, zoom: 14 });
+      new google.maps.Marker({ position: centre, map: el, title: el.dataset.title || '' });
+    };
+  </script>
 </body>
 
 </html>

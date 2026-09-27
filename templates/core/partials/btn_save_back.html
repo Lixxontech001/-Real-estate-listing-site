@@ -1,4 +1,5 @@
+{% load i18n %}
 <div class="form-group">
-    <button class="btn btn-secondary" type="submit">{{ _("Save") }}</button>
-    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">{{ _("Go back") }}</button>
+    <button class="btn btn-secondary" type="submit">{% translate "Save" %}</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">{% translate "Go back" %}</button>
 </div>

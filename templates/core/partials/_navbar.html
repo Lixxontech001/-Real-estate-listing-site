@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
     <div class="container">
@@ -18,7 +19,7 @@
             {% endif %}
           >
             <a class="nav-link" href="{% url 'index' %}">
-            {{ _("Real-estate") }}
+            {% translate "Real-estate" %}
           </a>
           </li>
           <li
@@ -30,7 +31,7 @@
           >
             <a class="nav-link" href="{% url 'about' %}">
 
-              {{ _("About Us") }}
+              {% translate "About Us" %}
 
             </a>
           </li>
@@ -43,7 +44,7 @@
           >
             <a class="nav-link" href="{% url 'listings' %}">
 
-              {{ _("Featured Listings") }}
+              {% translate "Featured Listings" %}
 
             </a>
           </li>
@@ -54,7 +55,7 @@
           {% if user.is_staff %}
           <li class="nav-item mr-3 text-left">
             <a href="{% url 'admin:index' %}" class="nav-link text-secondary" target='_blank'>
-              <i class="fas fa-user-shield"></i> {{ _("Admin") }}
+              <i class="fas fa-user-shield"></i> {% translate "Admin" %}
             </a>
           </li>
           {% endif %}
@@ -67,7 +68,7 @@
             {% endif %}
             >
               <a class="nav-link" href="{% url 'dashboard' %}">
-                {{ _("Dashboard") }}</a>
+                {% translate "Dashboard" %}</a>
             </li>
 
             <li
@@ -77,14 +78,14 @@
               class="nav-item mr-3"
             {% endif %}
             >
-              <a class="nav-link" href="{% url 'profile' user.id %}">
-                {{ _("Profile") }}</a>
+              <a class="nav-link" href="{% url 'profile' %}">
+                {% translate "Profile" %}</a>
             </li>
 
 
             <li class="nav-item mr-3">
               <a href="javascript:{document.getElementById('logout').submit()}" class="nav-link">
-                <i class="fas fa-sign-out-alt"></i> {{ _("Logout") }}
+                <i class="fas fa-sign-out-alt"></i> {% translate "Logout" %}
               </a>
               <form action="{% url 'logout' %}" method="POST" id="logout">
                 {% csrf_token %}
@@ -101,7 +102,7 @@
             {% endif %}
             >
               <a class="nav-link" href="{% url 'register' %}">
-                <i class="fas fa-user-plus"></i> {{ _("Register") }}</a>
+                <i class="fas fa-user-plus"></i> {% translate "Register" %}</a>
             </li>
             <li
             {% if 'login' in request.path %}
@@ -113,7 +114,7 @@
               <a class="nav-link" href="{% url 'login' %}">
                 <i class="fas fa-sign-in-alt"></i>
 
-                {{ _("Login") }}</a>
+                {% translate "Login" %}</a>
             </li>
           {% endif %}
         </ul>

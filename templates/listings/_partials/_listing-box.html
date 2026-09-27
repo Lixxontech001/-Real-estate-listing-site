@@ -1,5 +1,6 @@
 {% load static %}
 {% load humanize %}
+{% load i18n %}
 
 <div class="col-md-6 col-lg-4 mb-4">
 
@@ -7,13 +8,15 @@
   <div class="card listing-preview">
 
     <a href="{% url 'listing' listing.id %}" class="stretched-link">
-      <img class="card-img-top listing-img" src="{{ listing.image.url }}" alt="">
+      {% if listing.image %}<img class="card-img-top listing-img" src="{{ listing.image.url }}"
+           alt="{{ listing.title }}" loading="lazy">{% else %}
+      <div class="card-img-top listing-img bg-secondary"></div>{% endif %}
 
 
 
       <div class="card-img-overlay">
         <h2>
-          <span class="badge badge-success">${{ listing.price | intcomma }}</span>
+          <span class="badge badge-success">{{ listing.price|floatformat:0 }}&nbsp;&euro;</span>
 
         </h2>
       </div>
@@ -31,18 +34,18 @@
     </div>
     <div class="row py-2">
       <div class="col-6">
-        {{ _("m²") }}: {{ listing.sqft }}</div>
+        {% translate "m²" %}: {{ listing.sqft }}</div>
       <div class="col-6">
-        {{ _("Garage") }}: {{ listing.garage }}</div>
+        {% translate "Garage" %}: {{ listing.garage }}</div>
     </div>
     <div class="row py-2">
       <div class="col-6">
-        {{ _("Bedrooms") }}: {{ listing.bedrooms }}</div>
+        {% translate "Bedrooms" %}: {{ listing.bedrooms }}</div>
       <div class="col-6">
-        {{ _("Bathrooms") }}: {{ listing.bathrooms }}</div>
+        {% translate "Bathrooms" %}: {{ listing.bathrooms }}</div>
     </div>
 
-    <a href="{% url 'listing' listing.id %}" class="btn btn-secondary btn-block">{{ _("More Info") }}</a>
+    <a href="{% url 'listing' listing.id %}" class="btn btn-secondary btn-block">{% translate "More Info" %}</a>
   </div>
 </div>
 </div>

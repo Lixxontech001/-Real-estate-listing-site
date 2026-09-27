@@ -1,5 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block title %} | Address {% endblock %}
 
@@ -15,10 +16,10 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'index' %}">
-            <i class="fas fa-home"></i> {{ _("Home") }}</a>
+            <i class="fas fa-home"></i> {% translate "Home" %}</a>
         </li>
-        <li class="breadcrumb-item"> {{ _("Profile") }}</li>
-        <li class="breadcrumb-item active"> {{ _("Address") }}</li>
+        <li class="breadcrumb-item"> {% translate "Profile" %}</li>
+        <li class="breadcrumb-item active"> {% translate "Address" %}</li>
 
       </ol>
     </nav>
@@ -34,7 +35,7 @@
     <div class="pb-3 pt-3">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">{{ _("Address") }}</h5>
+          <h5 class="card-title">{% translate "Address" %}</h5>
           <hr>
           <form method="POST">
             {% csrf_token %}

@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load i18n %}
 
 {% block extrastyle %}
 <meta name="description" content="Real estate manager.
@@ -30,10 +31,10 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'index' %}">
-            <i class="fas fa-home"></i> {{ _("Home") }}</a>
+            <i class="fas fa-home"></i> {% translate "Home" %}</a>
         </li>
-        <li class="breadcrumb-item"> {{ _("Profile") }}</li>
-        <li class="breadcrumb-item active"> {{ _("Documents") }}</li>
+        <li class="breadcrumb-item"> {% translate "Profile" %}</li>
+        <li class="breadcrumb-item active"> {% translate "Documents" %}</li>
 
       </ol>
     </nav>
